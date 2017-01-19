@@ -1,0 +1,1 @@
+nuget pack "CommentLineToTestDescription\package.nuspec"
