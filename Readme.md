@@ -4,4 +4,4 @@ Build: rebuild run pack.cmd
 
 Todo:
 1) add build scrirpts
-2) add gif to display the fix
+2) use gif to demonstrate the fix
