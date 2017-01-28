@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
@@ -74,7 +75,7 @@ namespace SummaryToTestDescription
                 fullComment.AppendLine(node.GetText());
             }
 
-            var sanitized = this.Sanitize(fullComment);
+            var sanitized = this.SanitizeXml(fullComment);
 
             // full comment is a piece XML with all comments.
             var doc = new XmlDocument();
@@ -85,13 +86,14 @@ namespace SummaryToTestDescription
             }
 
             var text = doc.SelectSingleNode("/doc/summary").InnerText;
+            
             var propertyValuePairs = new List<Pair<string, AttributeValue>>
                                          {
                                              new Pair<string, AttributeValue>(
                                                  "Description",
                                                  new AttributeValue(
                                                      new ConstantValue(
-                                                         text,
+                                                         this.SanitizeText(text),
                                                          this.provider.PsiModule)))
                                          };
 
@@ -109,7 +111,14 @@ namespace SummaryToTestDescription
             return null;
         }
 
-        private string Sanitize(StringBuilder fullComment)
+        private string SanitizeText(string text)
+        {
+            RegexOptions options = RegexOptions.None;
+            Regex regex = new Regex("[ ]{2,}", options);
+            return regex.Replace(text.Trim(), " ");
+        }
+
+        private string SanitizeXml(StringBuilder fullComment)
         {
             return
               "<doc>" + fullComment.ToString()
