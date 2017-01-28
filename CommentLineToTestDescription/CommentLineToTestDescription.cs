@@ -1,4 +1,12 @@
-﻿namespace SummaryToTestDescription
+﻿using System.Diagnostics.SymbolStore;
+using System.IO;
+using System.Text;
+using System.Xml;
+using ICSharpCode.NRefactory.CSharp;
+using ICSharpCode.NRefactory.TypeSystem;
+using JetBrains.ReSharper.Psi.Tree;
+
+namespace SummaryToTestDescription
 {
     using System;
     using System.Collections.Generic;
@@ -40,8 +48,43 @@
             IAttribute attr = method.Attributes.FirstOrDefault(a => a.Name.QualifiedName == "Test");
 
             CSharpElementFactory factory = CSharpElementFactory.GetInstance(this.provider.PsiModule);
-            var commentNode = this.provider.TokenAfterCaret as IDocCommentNode;
-            var text = commentNode.CommentText.Trim();
+            IDocCommentNode commentNode = this.provider.TokenAfterCaret as IDocCommentNode;
+
+            var fullComment = new StringBuilder();
+            var previousPart = new List<string>(10);
+
+            // Get text from the pervious nodes
+            // Start from the prevous node.
+            for (ITreeNode node = commentNode.PrevSibling; node != null; node = node.PrevSibling)
+            {
+                previousPart.Add(node.GetText());    
+            }
+
+            // Reverse the order of previous parts.
+            previousPart.Reverse();
+
+            foreach (var part in previousPart)
+            {
+                fullComment.AppendLine(part);
+            }
+        
+            // Get text from the nodes beneath
+            for (ITreeNode node = commentNode; node != null; node = node.NextSibling)
+            {
+                fullComment.AppendLine(node.GetText());
+            }
+
+            var sanitized = this.Sanitize(fullComment);
+
+            // full comment is a piece XML with all comments.
+            var doc = new XmlDocument();
+
+            using (var reader = new StringReader(sanitized))
+            {
+                doc.Load(reader);
+            }
+
+            var text = doc.SelectSingleNode("/doc/summary").InnerText;
             var propertyValuePairs = new List<Pair<string, AttributeValue>>
                                          {
                                              new Pair<string, AttributeValue>(
@@ -54,7 +97,9 @@
 
             ISymbolScope declarationsCache = solution.GetPsiServices()
                 .Symbols.GetSymbolScope(LibrarySymbolScope.FULL, false);
-            ITypeElement declaredElement = declarationsCache.GetTypeElementByCLRName(typeof(TestAttribute).FullName);
+            ITypeElement declaredElement = declarationsCache.GetTypeElementByCLRName("NUnit.Framework.TestAttribute");
+
+            // Create Test attribute with populated Description
             IAttribute nameAttribute = factory.CreateAttribute(
                 declaredElement,
                 new AttributeValue[0],
@@ -62,6 +107,16 @@
             method.RemoveAttribute(attr);
             method.AddAttributeBefore(nameAttribute, null);
             return null;
+        }
+
+        private string Sanitize(StringBuilder fullComment)
+        {
+            return
+              "<doc>" + fullComment.ToString()
+                    .Replace("\r", string.Empty)
+                    .Replace("\n", string.Empty)
+                    .Replace(@"///", string.Empty)
+                    .Replace(@"//", string.Empty) + "</doc>";
         }
 
         public override bool IsAvailable(IUserDataHolder cache)
