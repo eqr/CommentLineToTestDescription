@@ -54,8 +54,8 @@ namespace SummaryToTestDescription
             var fullComment = new StringBuilder();
             var previousPart = new List<string>(10);
 
-            // Get text from the pervious nodes
-            // Start from the prevous node.
+            // Get text from the nodes before current.
+            // Start from the previous node.
             for (ITreeNode node = commentNode.PrevSibling; node != null; node = node.PrevSibling)
             {
                 previousPart.Add(node.GetText());    
