@@ -1,16 +1,13 @@
-﻿using System.Diagnostics.SymbolStore;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
-using ICSharpCode.NRefactory.CSharp;
-using ICSharpCode.NRefactory.TypeSystem;
-using JetBrains.ReSharper.Psi.Tree;
-
-namespace SummaryToTestDescription
+﻿namespace SummaryToTestDescription
 {
     using System;
     using System.Collections.Generic;
+
+    using System.IO;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Xml;
+    using JetBrains.ReSharper.Psi.Tree;
 
     using JetBrains.Application.Progress;
     using JetBrains.ProjectModel;
@@ -22,9 +19,7 @@ namespace SummaryToTestDescription
     using JetBrains.ReSharper.Psi.CSharp.Tree;
     using JetBrains.TextControl;
     using JetBrains.Util;
-
-    using NUnit.Framework;
-
+    
     [ContextAction(Group = "C#", Name = "Comment line to test description", Description = "Comment line to test description")]
     public class CommentLineToTestDescription : ContextActionBase
     {
