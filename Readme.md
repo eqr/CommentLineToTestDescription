@@ -1,7 +1,5 @@
-ReSharper 10 plugin that creates a [Test(Description="")] value from current comment line.
+ReSharper 10 plugin that creates a [Test(Description="")] value from current comment section.
 
 Build: rebuild run pack.cmd
 
-Todo:
-1) add build scrirpts
-2) use gif to demonstrate the fix
+![Demo](https://github.com/eqr/CommentLineToTestDescription/blob/master/demo.gif)
