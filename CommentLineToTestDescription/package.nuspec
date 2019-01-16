@@ -9,7 +9,7 @@
 		<description>Resharper.CommentLineToTestDescription</description>
 		<tags>NUnit test description summary comment</tags>
 		<dependencies>
-			<dependency id="Wave" version="9.0" />
+			<dependency id="Wave" version="[183.0.0]" />
 		</dependencies>
 	</metadata>
 	<files>
